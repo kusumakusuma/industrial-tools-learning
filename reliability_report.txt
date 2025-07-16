@@ -1,0 +1,5 @@
+Reliability Report
+Equipment: gt a
+Date: 2025-07-17 06:35
+MTBF: 2310.00 hours
+Availability: 99.44%
