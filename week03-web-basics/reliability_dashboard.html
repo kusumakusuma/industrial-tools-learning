@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reliability Dashboard - Industrial Tools</title>
+    
+    <style>
+        /* CSS LESSON 1: Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* CSS LESSON 2: Container and layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* CSS LESSON 3: Header styling */
+        .header {
+            /* background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); */
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); /* Green gradient */
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        /* CSS LESSON 4: Card-based layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        /* CSS LESSON 5: Status indicators */
+        .status-good { color: #27ae60; }
+        .status-fair { color: #f39c12; }
+        .status-poor { color: #e74c3c; }
+
+        /* CSS LESSON 6: Equipment table */
+        .equipment-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .equipment-table h2 {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: #ecf0f1;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* CSS LESSON 7: Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-good {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-fair {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* CSS LESSON 8: Interactive elements */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        /* CSS LESSON 9: Form styling */
+        .add-equipment-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        /* CSS LESSON 10: Responsive design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HTML LESSON 1: Document structure -->
+    <header class="header">
+        <div class="container">
+            <h1>⚙️ My Company Reliability Dashboard</h1>
+            <p>Real-time Equipment Performance Monitoring</p>
+        </div>
+    </header>
+
+    <!-- HTML LESSON 2: Main content container -->
+    <main class="container">
+        <!-- HTML LESSON 3: Dashboard metrics -->
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-label">Fleet Availability</div>
+                <div class="metric-value status-good">96.5%</div>
+                <p>Last 30 days average</p>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Total Equipment</div>
+                <div class="metric-value">12</div>
+                <p>Active units monitored</p>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Critical Alerts</div>
+                <div class="metric-value status-poor">3</div>
+                <p>Require immediate attention</p>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Avg MTBF</div>
+                <div class="metric-value">342h</div>
+                <p>Fleet-wide average</p>
+            </div>
+        </div>
+
+        <!-- HTML LESSON 4: Data table -->
+        <div class="equipment-table">
+            <h2>Equipment Status</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipment</th>
+                        <th>Availability</th>
+                        <th>MTBF (hours)</th>
+                        <th>Failures</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="equipment-tbody">
+                    <tr>
+                        <td><strong>Pump-101</strong></td>
+                        <td>96.5%</td>
+                        <td>231.7</td>
+                        <td>3</td>
+                        <td><span class="status-badge badge-good">GOOD</span></td>
+                        <td>
+                            <button class="btn" onclick="viewDetails('Pump-101')">View</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Compressor-A</strong></td>
+                        <td>88.2%</td>
+                        <td>145.2</td>
+                        <td>5</td>
+                        <td><span class="status-badge badge-fair">FAIR</span></td>
+                        <td>
+                            <button class="btn" onclick="viewDetails('Compressor-A')">View</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Motor-15</strong></td>
+                        <td>76.4%</td>
+                        <td>95.5</td>
+                        <td>8</td>
+                        <td><span class="status-badge badge-poor">POOR</span></td>
+                        <td>
+                            <button class="btn" onclick="viewDetails('Motor-15')">View</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- HTML LESSON 5: Interactive form -->
+        <div class="add-equipment-form">
+            <h2>Add New Equipment</h2>
+            <form id="add-equipment-form">
+                <div class="form-group">
+                    <label for="equipment-name">Equipment Name</label>
+                    <input type="text" id="equipment-name" required placeholder="e.g., Pump-102">
+                </div>
+                
+                <div class="form-group">
+                    <label for="total-hours">Total Operating Hours</label>
+                    <input type="number" id="total-hours" required placeholder="720">
+                </div>
+                
+                <div class="form-group">
+                    <label for="uptime-hours">Uptime Hours</label>
+                    <input type="number" id="uptime-hours" required placeholder="695">
+                </div>
+                
+                <div class="form-group">
+                    <label for="failures">Number of Failures</label>
+                    <input type="number" id="failures" required placeholder="2">
+                </div>
+                
+                <button type="submit" class="btn btn-success">Add Equipment</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- JavaScript LESSON: Adding interactivity -->
+    <script>
+        // JavaScript Lesson 1: Functions
+        function viewDetails(equipmentName) {
+            alert(`Viewing details for ${equipmentName}\n\nThis would open a detailed view with:\n- Failure history\n- Maintenance schedule\n- Performance trends`);
+        }
+
+        // JavaScript Lesson 2: Form handling
+        document.getElementById('add-equipment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('equipment-name').value;
+            const totalHours = parseFloat(document.getElementById('total-hours').value);
+            const uptimeHours = parseFloat(document.getElementById('uptime-hours').value);
+            const failures = parseInt(document.getElementById('failures').value);
+            
+            // Calculate metrics
+            const availability = (uptimeHours / totalHours * 100).toFixed(1);
+            const mtbf = failures > 0 ? (uptimeHours / failures).toFixed(1) : 'No failures';
+            
+            // Determine status
+            let statusClass, statusText;
+            if (availability >= 98) {
+                statusClass = 'badge-good';
+                statusText = 'GOOD';
+            } else if (availability >= 90) {
+                statusClass = 'badge-fair';
+                statusText = 'FAIR';
+            } else {
+                statusClass = 'badge-poor';
+                statusText = 'POOR';
+            }
+            
+            // Add to table
+            const tbody = document.getElementById('equipment-tbody');
+            const newRow = tbody.insertRow();
+            newRow.innerHTML = `
+                <td><strong>${name}</strong></td>
+                <td>${availability}%</td>
+                <td>${mtbf}</td>
+                <td>${failures}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>
+                    <button class="btn" onclick="viewDetails('${name}')">View</button>
+                </td>
+            `;
+            
+            // Clear form
+            this.reset();
+            
+            // Show success message
+            alert(`✅ Equipment "${name}" added successfully!`);
+        });
+
+        // JavaScript Lesson 3: Dynamic updates
+        function updateDashboard() {
+            // Simulate real-time updates
+            const availabilityElement = document.querySelector('.status-good');
+            const currentValue = parseFloat(availabilityElement.textContent);
+            const newValue = (currentValue + (Math.random() - 0.5) * 0.1).toFixed(1);
+            availabilityElement.textContent = newValue + '%';
+        }
+
+        // Update every 5 seconds (for demo)
+        setInterval(updateDashboard, 5000);
+    </script>
+</body>
+</html>
