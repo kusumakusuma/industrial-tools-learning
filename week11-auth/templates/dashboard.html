@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReliaMaster Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Arial, sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+      }
+
+      .header {
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .logo-icon {
+        background: #4f46e5;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #4b5563;
+      }
+
+      .btn-logout {
+        padding: 8px 16px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+      }
+
+      .btn-logout:hover {
+        background: #dc2626;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .welcome-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .welcome-section h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .welcome-section p {
+        color: #6b7280;
+        font-size: 1.1rem;
+      }
+
+      .modules-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .module-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+      }
+
+      .module-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      .module-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .module-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+
+      .icon-equipment {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+      .icon-rca {
+        background: #fef3c7;
+        color: #d97706;
+      }
+      .icon-bad-actor {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+      .icon-rcm {
+        background: #d1fae5;
+        color: #059669;
+      }
+
+      .module-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .module-description {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+
+      .module-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .btn-primary {
+        background: #4f46e5;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #4338ca;
+      }
+
+      .btn-secondary {
+        background: #e5e7eb;
+        color: #374151;
+      }
+
+      .btn-secondary:hover {
+        background: #d1d5db;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4f46e5;
+      }
+
+      .stat-label {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #6b7280;
+      }
+
+      @media (max-width: 768px) {
+        .modules-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header-content {
+          padding: 1rem;
+        }
+
+        .welcome-section h1 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">⚙️</div>
+          <span>ReliaMaster</span>
+        </div>
+        <div class="user-menu">
+          <div class="user-info">
+            <div class="user-avatar" id="user-avatar">?</div>
+            <span id="username">Loading...</span>
+          </div>
+          <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="welcome-section">
+        <h1>Welcome to ReliaMaster</h1>
+        <p>Your comprehensive Reliability Framework Management platform</p>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="total-equipment">-</div>
+          <div class="stat-label">Total Equipment</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="fleet-availability">-</div>
+          <div class="stat-label">Fleet Availability</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="critical-alerts">-</div>
+          <div class="stat-label">Critical Alerts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avg-mtbf">-</div>
+          <div class="stat-label">Average MTBF</div>
+        </div>
+      </div>
+
+      <div class="modules-grid">
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon icon-equipment">📊</div>
+            <div>
+              <div class="module-title">Equipment Management</div>
+            </div>
+          </div>
+          <p class="module-description">
+            Track and manage your equipment reliability, performance metrics,
+            and maintenance history.
+          </p>
+          <div class="module-actions">
+            <a href="/equipment" class="btn btn-primary">View Equipment</a>
+            <button class="btn btn-secondary" onclick="showAddEquipment()">
+              Add Equipment
+            </button>
+          </div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon icon-rca">🔍</div>
+            <div>
+              <div class="module-title">Root Cause Analysis</div>
+            </div>
+          </div>
+          <p class="module-description">
+            Investigate failure patterns using 5 Whys, Fishbone diagrams, and
+            fault tree analysis.
+          </p>
+          <div class="module-actions">
+            <button
+              class="btn btn-primary"
+              onclick="alert('RCA module coming soon!')"
+            >
+              Start RCA Investigation
+            </button>
+          </div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon icon-bad-actor">⚠️</div>
+            <div>
+              <div class="module-title">Bad Actor Management</div>
+            </div>
+          </div>
+          <p class="module-description">
+            Track and analyze problematic equipment using Weibull analysis and
+            failure pattern recognition.
+          </p>
+          <div class="module-actions">
+            <button
+              class="btn btn-primary"
+              onclick="alert('Bad Actor module coming soon!')"
+            >
+              Manage Bad Actors
+            </button>
+          </div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon icon-rcm">🛠️</div>
+            <div>
+              <div class="module-title">Reliability-Centered Maintenance</div>
+            </div>
+          </div>
+          <p class="module-description">
+            Develop optimized maintenance strategies using RCM methodology and
+            decision logic.
+          </p>
+          <div class="module-actions">
+            <button
+              class="btn btn-primary"
+              onclick="alert('RCM module coming soon!')"
+            >
+              Develop RCM Strategy
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:5000/api";
+
+      // Load user info
+      async function loadUserInfo() {
+        try {
+          const response = await fetch(`${API_BASE}/user`, {
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById("username").textContent =
+              data.user.username;
+            document.getElementById("user-avatar").textContent =
+              data.user.username[0].toUpperCase();
+          } else {
+            window.location.href = "/login";
+          }
+        } catch (error) {
+          console.error("Error loading user info:", error);
+        }
+      }
+
+      // Load statistics
+      async function loadStatistics() {
+        try {
+          const response = await fetch(`${API_BASE}/equipment`, {
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById("total-equipment").textContent =
+              data.statistics.total_equipment;
+            document.getElementById("fleet-availability").textContent =
+              data.statistics.fleet_availability + "%";
+            document.getElementById("critical-alerts").textContent =
+              data.statistics.critical_alerts;
+            document.getElementById("avg-mtbf").textContent =
+              data.statistics.avg_mtbf + "h";
+          }
+        } catch (error) {
+          console.error("Error loading statistics:", error);
+        }
+      }
+
+      // Logout function
+      async function logout() {
+        try {
+          const response = await fetch(`${API_BASE}/logout`, {
+            method: "POST",
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            window.location.href = "/login";
+          }
+        } catch (error) {
+          console.error("Error logging out:", error);
+        }
+      }
+
+      // Show add equipment form (placeholder)
+      function showAddEquipment() {
+        alert(
+          "Add equipment form would appear here. For now, use the equipment management page."
+        );
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        loadUserInfo();
+        loadStatistics();
+      });
+    </script>
+  </body>
+</html>

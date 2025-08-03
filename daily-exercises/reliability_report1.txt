@@ -1,0 +1,4 @@
+[Pump A] - 2024-08-12 - Overheated
+[Compressor B] - 2024-08-13 - High vibration
+[Fan C] - 2024-08-14 - Bearing wear
+[PV 1] - 2024-08-15 - Rupture

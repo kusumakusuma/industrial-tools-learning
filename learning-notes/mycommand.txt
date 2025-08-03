@@ -1,0 +1,5 @@
+cd ~/industrial-tools-learning
+
+source venv/bin/activate
+
+git status

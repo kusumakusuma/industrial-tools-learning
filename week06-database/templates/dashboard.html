@@ -3,10 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reliability Dashboard - Industrial Tools</title>
+    <title>Reliability Dashboard - SQLite Database</title>
 
     <style>
-      /* Previous CSS remains the same - keeping core styles */
       * {
         margin: 0;
         padding: 0;
@@ -150,9 +149,14 @@
         color: #721c24;
       }
 
+      .badge-nodata {
+        background: #e2e3e5;
+        color: #383d41;
+      }
+
       .btn {
         display: inline-block;
-        padding: 10px 20px;
+        padding: 8px 16px;
         background: #3498db;
         color: white;
         border: none;
@@ -160,7 +164,8 @@
         cursor: pointer;
         text-decoration: none;
         transition: background 0.3s ease;
-        margin: 5px;
+        margin: 2px;
+        font-size: 0.9em;
       }
 
       .btn:hover {
@@ -243,11 +248,9 @@
         .header h1 {
           font-size: 2em;
         }
-
         .dashboard-grid {
           grid-template-columns: 1fr;
         }
-
         table {
           font-size: 0.9em;
         }
@@ -259,19 +262,19 @@
       <div class="container">
         <h1>⚙️ Reliability Dashboard</h1>
         <p>Real-time Equipment Performance Monitoring</p>
-        <p style="font-size: 0.9em; opacity: 0.7">Connected to Flask Backend</p>
+        <p style="font-size: 0.9em; opacity: 0.7">SQLite Database Version</p>
       </div>
     </header>
 
     <main class="container">
-      <!-- Dashboard metrics will be populated by JavaScript -->
+      <!-- Dashboard metrics -->
       <div class="dashboard-grid" id="metrics-grid">
         <div class="metric-card">
           <div class="metric-label">Fleet Availability</div>
           <div class="metric-value" id="fleet-availability">
             <span class="loading">Loading...</span>
           </div>
-          <p>Last 30 days average</p>
+          <p>Average across all equipment</p>
         </div>
 
         <div class="metric-card">
@@ -287,7 +290,7 @@
           <div class="metric-value" id="critical-alerts">
             <span class="loading">Loading...</span>
           </div>
-          <p>Require immediate attention</p>
+          <p>Equipment below 90% availability</p>
         </div>
 
         <div class="metric-card">
@@ -309,16 +312,17 @@
           <thead>
             <tr>
               <th>Equipment</th>
+              <th>Type</th>
+              <th>Location</th>
               <th>Availability</th>
-              <th>MTBF (hours)</th>
-              <th>Failures</th>
+              <th>MTBF</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="equipment-tbody">
             <tr>
-              <td colspan="6" class="loading">Loading equipment data...</td>
+              <td colspan="7" class="loading">Loading equipment data...</td>
             </tr>
           </tbody>
         </table>
@@ -329,7 +333,7 @@
         <h2>Add New Equipment</h2>
         <form id="add-equipment-form">
           <div class="form-group">
-            <label for="equipment-name">Equipment Name</label>
+            <label for="equipment-name">Equipment Name *</label>
             <input
               type="text"
               id="equipment-name"
@@ -339,29 +343,49 @@
           </div>
 
           <div class="form-group">
-            <label for="total-hours">Total Operating Hours</label>
+            <label for="equipment-type">Equipment Type</label>
+            <input
+              type="text"
+              id="equipment-type"
+              placeholder="e.g., Centrifugal Pump"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="equipment-location">Location</label>
+            <input
+              type="text"
+              id="equipment-location"
+              placeholder="e.g., Building A"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="total-hours">Total Operating Hours *</label>
             <input
               type="number"
               id="total-hours"
               required
               placeholder="720"
               step="0.1"
+              min="0"
             />
           </div>
 
           <div class="form-group">
-            <label for="uptime-hours">Uptime Hours</label>
+            <label for="uptime-hours">Uptime Hours *</label>
             <input
               type="number"
               id="uptime-hours"
               required
               placeholder="695"
               step="0.1"
+              min="0"
             />
           </div>
 
           <div class="form-group">
-            <label for="failures">Number of Failures</label>
+            <label for="failures">Number of Failures *</label>
             <input
               type="number"
               id="failures"
@@ -389,7 +413,6 @@
         messageDiv.textContent = message;
         container.appendChild(messageDiv);
 
-        // Remove message after 5 seconds
         setTimeout(() => {
           messageDiv.remove();
         }, 5000);
@@ -400,21 +423,33 @@
         try {
           const response = await fetch(`${API_BASE}/equipment`);
           const data = await response.json();
+          console.log("Loaded data:", data); // Debug log
 
           // Update metrics
+          const availability = data.statistics.fleet_availability;
           document.getElementById(
             "fleet-availability"
-          ).innerHTML = `<span class="status-good">${data.statistics.fleet_availability}%</span>`;
+          ).innerHTML = `<span class="${
+            availability >= 95
+              ? "status-good"
+              : availability >= 90
+              ? "status-fair"
+              : "status-poor"
+          }">${availability}%</span>`;
+
           document.getElementById("total-equipment").textContent =
             data.statistics.total_equipment;
+
           document.getElementById(
             "critical-alerts"
           ).innerHTML = `<span class="${
             data.statistics.critical_alerts > 0 ? "status-poor" : "status-good"
           }">${data.statistics.critical_alerts}</span>`;
-          document.getElementById(
-            "avg-mtbf"
-          ).textContent = `${data.statistics.avg_mtbf}h`;
+
+          document.getElementById("avg-mtbf").textContent =
+            data.statistics.avg_mtbf > 0
+              ? `${data.statistics.avg_mtbf}h`
+              : "N/A";
 
           // Update table
           const tbody = document.getElementById("equipment-tbody");
@@ -422,36 +457,51 @@
 
           if (data.equipment.length === 0) {
             tbody.innerHTML =
-              '<tr><td colspan="6" style="text-align: center;">No equipment found. Add some!</td></tr>';
+              '<tr><td colspan="7" style="text-align: center;">No equipment found. Add some!</td></tr>';
             return;
           }
 
           data.equipment.forEach((eq) => {
             const row = tbody.insertRow();
-            const statusClass =
-              eq.status === "GOOD"
-                ? "badge-good"
-                : eq.status === "FAIR"
-                ? "badge-fair"
-                : "badge-poor";
+
+            // Determine status class
+            let statusClass = "badge-nodata";
+            if (eq.status === "GOOD") {
+              statusClass = "badge-good";
+            } else if (eq.status === "FAIR") {
+              statusClass = "badge-fair";
+            } else if (eq.status === "POOR") {
+              statusClass = "badge-poor";
+            }
+
+            // Format values
+            const availDisplay =
+              eq.availability !== undefined
+                ? `${eq.availability.toFixed(1)}%`
+                : "No data";
+            const mtbfDisplay =
+              eq.mtbf !== undefined
+                ? eq.mtbf >= 999999
+                  ? "No failures"
+                  : `${eq.mtbf.toFixed(1)}h`
+                : "No data";
 
             row.innerHTML = `
                         <td><strong>${eq.name}</strong></td>
-                        <td>${eq.availability.toFixed(1)}%</td>
-                        <td>${
-                          eq.mtbf < 999999 ? eq.mtbf.toFixed(1) : "No failures"
-                        }</td>
-                        <td>${eq.failures}</td>
+                        <td>${eq.type || "Unknown"}</td>
+                        <td>${eq.location || "Not specified"}</td>
+                        <td>${availDisplay}</td>
+                        <td>${mtbfDisplay}</td>
                         <td><span class="status-badge ${statusClass}">${
               eq.status
             }</span></td>
                         <td>
-                            <button class="btn" onclick="viewDetails('${
-                              eq.name
-                            }')">View</button>
-                            <button class="btn btn-danger" onclick="deleteEquipment('${
-                              eq.name
-                            }')">Delete</button>
+                            <button class="btn" onclick="viewDetails(${
+                              eq.id
+                            }, '${eq.name}')">View</button>
+                            <button class="btn btn-danger" onclick="deleteEquipment(${
+                              eq.id
+                            }, '${eq.name}')">Delete</button>
                         </td>
                     `;
           });
@@ -461,44 +511,64 @@
         }
       }
 
-      // View equipment details
-      async function viewDetails(equipmentName) {
+      // View equipment details - FIXED to accept both ID and name
+      async function viewDetails(equipmentId, equipmentName) {
         try {
-          const response = await fetch(
-            `${API_BASE}/equipment/${equipmentName}`
-          );
+          const response = await fetch(`${API_BASE}/equipment/${equipmentId}`);
           const data = await response.json();
 
-          alert(
-            `Equipment Details: ${equipmentName}\n\n` +
-              `Availability: ${data.availability.toFixed(2)}%\n` +
-              `MTBF: ${
-                data.mtbf < 999999
-                  ? data.mtbf.toFixed(2) + " hours"
-                  : "No failures"
-              }\n` +
-              `MTTR: ${data.mttr.toFixed(2)} hours\n` +
-              `Performance Score: ${data.performance_score.toFixed(1)}/100\n` +
-              `Maintenance Priority: ${data.maintenance_priority}`
-          );
+          let detailsText = `Equipment Details: ${equipmentName}\n\n`;
+          detailsText += `Type: ${data.equipment.type || "Unknown"}\n`;
+          detailsText += `Location: ${
+            data.equipment.location || "Not specified"
+          }\n`;
+          detailsText += `Installed: ${data.equipment.install_date}\n`;
+
+          if (data.equipment.availability !== undefined) {
+            detailsText += `Current Availability: ${data.equipment.availability.toFixed(
+              2
+            )}%\n`;
+            detailsText += `MTBF: ${
+              data.equipment.mtbf < 999999
+                ? data.equipment.mtbf.toFixed(2) + " hours"
+                : "No failures"
+            }\n`;
+            detailsText += `MTTR: ${data.equipment.mttr.toFixed(2)} hours\n`;
+          }
+
+          detailsText += `Trend: ${data.trend}\n`;
+          detailsText += `Total Readings: ${data.total_readings}`;
+
+          if (data.history && data.history.length > 0) {
+            detailsText += "\n\nRecent History:\n";
+            data.history.slice(0, 3).forEach((h) => {
+              detailsText += `${h.date}: ${h.availability.toFixed(
+                1
+              )}% availability, ${h.failures} failures\n`;
+            });
+          }
+
+          alert(detailsText);
         } catch (error) {
+          console.error("Error:", error);
           showMessage("Error loading equipment details", "error");
         }
       }
 
-      // Delete equipment
-      async function deleteEquipment(equipmentName) {
-        if (!confirm(`Are you sure you want to delete ${equipmentName}?`)) {
+      // Delete equipment - FIXED to accept both ID and name
+      async function deleteEquipment(equipmentId, equipmentName) {
+        if (
+          !confirm(
+            `Are you sure you want to delete ${equipmentName}? This will also delete all its performance history.`
+          )
+        ) {
           return;
         }
 
         try {
-          const response = await fetch(
-            `${API_BASE}/equipment/${equipmentName}`,
-            {
-              method: "DELETE",
-            }
-          );
+          const response = await fetch(`${API_BASE}/equipment/${equipmentId}`, {
+            method: "DELETE",
+          });
 
           const data = await response.json();
 
@@ -506,21 +576,28 @@
             showMessage(data.message);
             loadEquipmentData(); // Reload the table
           } else {
-            showMessage(data.error, "error");
+            showMessage(data.error || "Error deleting equipment", "error");
           }
         } catch (error) {
+          console.error("Error:", error);
           showMessage("Error deleting equipment", "error");
         }
       }
 
-      // Handle form submission
+      // Handle form submission - FIXED to include type and location
       document
         .getElementById("add-equipment-form")
         .addEventListener("submit", async function (e) {
           e.preventDefault();
 
           const equipmentData = {
-            name: document.getElementById("equipment-name").value,
+            name: document.getElementById("equipment-name").value.trim(),
+            type:
+              document.getElementById("equipment-type").value.trim() ||
+              "Unknown",
+            location:
+              document.getElementById("equipment-location").value.trim() ||
+              "Not specified",
             total_hours: parseFloat(
               document.getElementById("total-hours").value
             ),
@@ -546,26 +623,33 @@
               this.reset(); // Clear form
               loadEquipmentData(); // Reload data
             } else {
-              showMessage(data.error, "error");
+              showMessage(data.error || "Error adding equipment", "error");
             }
           } catch (error) {
+            console.error("Error:", error);
             showMessage("Error adding equipment", "error");
           }
         });
 
+      // Check API health on load
+      async function checkHealth() {
+        try {
+          const response = await fetch(`${API_BASE}/health`);
+          const data = await response.json();
+          console.log("API Health:", data);
+        } catch (error) {
+          console.error("API might not be running:", error);
+        }
+      }
+
       // Load data when page loads
       window.addEventListener("load", () => {
+        checkHealth();
         loadEquipmentData();
 
         // Refresh data every 30 seconds
         setInterval(loadEquipmentData, 30000);
       });
-
-      // Check API health
-      fetch(`${API_BASE}/health`)
-        .then((response) => response.json())
-        .then((data) => console.log("API Status:", data))
-        .catch((error) => console.error("API might not be running:", error));
     </script>
   </body>
 </html>

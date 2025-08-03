@@ -1,0 +1,45 @@
+# Variables and data types
+age = 25                # Integer
+height = 5.9            # Float
+name = "Alice"          # String
+is_student = True       # Boolean
+
+print("Name:", name)
+print("Age:", age)
+print("Height:", height)
+print("Is Student:", is_student)    
+
+# Arithmetic operations
+a = 10
+b = 3
+
+addition = a + b        # Addition
+subtraction = a - b     # Subtraction
+multiplication = a * b  # Multiplication
+division = a / b        # Division (returns a float)
+modulus = a % b         # Modulus (remainder of division)
+exponentiation = a ** b # Exponentiation (a raised to the power of b)
+
+print("Addition:", addition)
+print("Subtraction:", subtraction)
+print("Multiplication:", multiplication)
+print("Division:", division)
+print("Modulus:", modulus)
+print("Exponentiation:", exponentiation)
+
+# String manipulation
+greeting = "Hello"
+name = "Alice"
+
+# Concatenation
+message = greeting + ", " + name + "!"
+print(message)  # Output: Hello, Alice!
+
+# String formatting
+formatted_message = f"{greeting}, {name}! Welcome to Python."
+print(formatted_message)  # Output: Hello, Alice! Welcome to Python.
+
+# String methods
+print(name.upper())       # Output: ALICE
+print(name.lower())       # Output: alice
+print(len(name))          # Output: 5 (length of the string)
