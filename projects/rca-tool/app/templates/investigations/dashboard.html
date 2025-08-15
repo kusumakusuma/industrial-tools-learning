@@ -1,0 +1,114 @@
+{% extends "base.html" %} {% block content %}
+<div class="container-fluid mt-4">
+  <h1>Investigation Dashboard</h1>
+
+  <!-- Statistics Cards -->
+  <div class="row mt-4">
+    <div class="col-md-3">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <h5 class="card-title">Total</h5>
+          <h2>{{ stats.total }}</h2>
+          <small>All Investigations</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <h5 class="card-title">In Progress</h5>
+          <h2>{{ stats.in_progress }}</h2>
+          <small>Active Cases</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <h5 class="card-title">Completed</h5>
+          <h2>{{ stats.completed }}</h2>
+          <small>Closed Cases</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <h5 class="card-title">Overdue</h5>
+          <h2>{{ stats.overdue }}</h2>
+          <small>> 30 Days</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Investigations Table -->
+  <div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5>Investigations</h5>
+      <a
+        href="{{ url_for('investigations.create_investigation') }}"
+        class="btn btn-primary"
+      >
+        <i class="fas fa-plus"></i> New Investigation
+      </a>
+    </div>
+    <div class="card-body">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Incident Date</th>
+            <th>Progress</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in investigations %}
+          <tr>
+            <td>
+              <a
+                href="{{ url_for('investigations.view_investigation', id=inv.id) }}"
+              >
+                {{ inv.reference_number }}
+              </a>
+            </td>
+            <td>{{ inv.title }}</td>
+            <td>
+              <span class="badge bg-secondary">{{ inv.status|upper }}</span>
+            </td>
+            <td>{{ inv.incident_date.strftime('%Y-%m-%d') }}</td>
+            <td>
+              <div class="progress" style="height: 20px">
+                <div class="progress-bar" style="width: {{ inv.progress }}%">
+                  {{ inv.progress }}%
+                </div>
+              </div>
+            </td>
+            <td>
+              <a
+                href="{{ url_for('investigations.view_investigation', id=inv.id) }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center">
+              No investigations yet.
+              <a href="{{ url_for('investigations.create_investigation') }}"
+                >Create your first one!</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
